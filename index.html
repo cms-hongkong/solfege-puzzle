@@ -23,7 +23,7 @@
         
         .game-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 25px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
@@ -49,23 +49,65 @@
             margin-bottom: 20px;
         }
         
-        .instructions {
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
             background: #e9f5ff;
             border-radius: 15px;
             padding: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .mode-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mode-icon {
+            font-size: 1.8rem;
+        }
+        
+        .score-board {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .score-item {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .instructions {
+            background: #e9f5ff;
+            border-radius: 15px;
+            padding: 20px;
             margin-bottom: 25px;
             border-left: 8px solid #4d96ff;
         }
         
         .instructions h2 {
             color: #2575fc;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-size: 1.5rem;
         }
         
         .instructions p {
             color: #333;
             line-height: 1.6;
+            margin-bottom: 10px;
         }
         
         .game-area {
@@ -153,11 +195,13 @@
         }
         
         .cards-container {
-            flex: 1;
+            flex: 1.5;
             background: #fff9e6;
             border-radius: 20px;
             padding: 20px;
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
         
         .cards-title {
@@ -169,24 +213,28 @@
         
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 25px;
+            flex-grow: 1;
         }
         
         .solfege-card {
             height: 90px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 15px;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: white;
             cursor: grab;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             user-select: none;
+            text-align: center;
+            position: relative;
         }
         
         .solfege-card:hover {
@@ -199,6 +247,11 @@
             cursor: grabbing;
         }
         
+        .solfege-card .animal-icon {
+            font-size: 1.5rem;
+            margin-top: 5px;
+        }
+        
         .card-do { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
         .card-re { background: linear-gradient(135deg, #FF9A3D, #FFB56B); }
         .card-mi { background: linear-gradient(135deg, #FFD93D, #FFE57F); }
@@ -206,26 +259,26 @@
         .card-sol { background: linear-gradient(135deg, #4D96FF, #6BAAFF); }
         .card-la { background: linear-gradient(135deg, #9D4EDD, #B26FE6); }
         .card-ti { background: linear-gradient(135deg, #FF6B9D, #FF8EB5); }
-        .card-do-high { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
         
         .controls {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-top: 25px;
+            margin-top: auto;
         }
         
         .message {
             text-align: center;
             padding: 15px;
             border-radius: 15px;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            min-height: 60px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            line-height: 1.5;
         }
         
         .message.success {
@@ -238,6 +291,12 @@
             background-color: #e3f2fd;
             color: #1565c0;
             border: 3px solid #90caf9;
+        }
+        
+        .message.warning {
+            background-color: #fff8e1;
+            color: #ff8f00;
+            border: 3px solid #ffd54f;
         }
         
         .buttons {
@@ -263,6 +322,12 @@
             flex: 2;
         }
         
+        #next-btn {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            flex: 1;
+        }
+        
         #reset-btn {
             background: linear-gradient(135deg, #ff6b6b, #ff9a3d);
             color: white;
@@ -279,7 +344,7 @@
         }
         
         .progress-container {
-            margin-top: 20px;
+            margin-top: 10px;
             background: #f0f0f0;
             border-radius: 10px;
             height: 20px;
@@ -302,8 +367,7 @@
         }
         
         .animal-icon {
-            font-size: 2rem;
-            margin-right: 10px;
+            margin-right: 5px;
         }
         
         .step.filled .animal-icon {
@@ -324,21 +388,75 @@
         .celebrate {
             animation: celebrate 0.5s ease 3;
         }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .challenge-mode {
+            background: linear-gradient(135deg, #ff6b6b, #ff9a3d);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .hint {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <header>
             <h1>🎵 音樂階梯大冒險 🎵</h1>
-            <p class="subtitle">幫小動物們找回正確的唱名位置！</p>
+            <p class="subtitle">每次都有新挑戰！你能通過所有考驗嗎？</p>
         </header>
         
+        <div class="game-info">
+            <div class="mode-indicator">
+                <span class="mode-icon" id="mode-icon">🎯</span>
+                <div>
+                    <div id="mode-name">經典模式</div>
+                    <div id="challenge-desc">完整階梯挑戰</div>
+                </div>
+            </div>
+            
+            <div class="score-board">
+                <div class="score-item">
+                    <span>關卡:</span>
+                    <span id="level-count">1</span>
+                </div>
+                <div class="score-item">
+                    <span>分數:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="score-item">
+                    <span>最高分:</span>
+                    <span id="high-score">0</span>
+                </div>
+            </div>
+        </div>
+        
         <div class="instructions">
-            <h2>📚 遊戲玩法：</h2>
-            <p>1. 將下方彩色卡片拖放到音樂階梯的正確位置上</p>
-            <p>2. 從最低的 Do 開始，一直到最高的 Do</p>
-            <p>3. 全部放對位置後，按下「檢查答案」按鈕</p>
-            <p>4. 每個唱名都有專屬的顏色和動物朋友哦！</p>
+            <h2 id="instruction-title">📚 當前挑戰：</h2>
+            <p id="instruction-text">將卡片拖放到音樂階梯的正確位置上</p>
+            <p id="challenge-hint">從最低的 Do 開始，一直到最高的 Do</p>
         </div>
         
         <div class="game-area">
@@ -384,26 +502,19 @@
             </div>
             
             <div class="cards-container">
-                <h2 class="cards-title">🎴 唱名卡片 🎴</h2>
-                <div class="cards-grid">
-                    <!-- 唱名卡片 -->
-                    <div class="solfege-card card-do" data-solfege="Do" data-position="1">Do <span class="animal-icon">🐻</span></div>
-                    <div class="solfege-card card-re" data-solfege="Re" data-position="2">Re <span class="animal-icon">🐰</span></div>
-                    <div class="solfege-card card-mi" data-solfege="Mi" data-position="3">Mi <span class="animal-icon">🐱</span></div>
-                    <div class="solfege-card card-fa" data-solfege="Fa" data-position="4">Fa <span class="animal-icon">🐸</span></div>
-                    <div class="solfege-card card-sol" data-solfege="Sol" data-position="5">Sol <span class="animal-icon">🐶</span></div>
-                    <div class="solfege-card card-la" data-solfege="La" data-position="6">La <span class="animal-icon">🦁</span></div>
-                    <div class="solfege-card card-ti" data-solfege="Ti" data-position="7">Ti <span class="animal-icon">🐯</span></div>
-                    <div class="solfege-card card-do-high" data-solfege="Do" data-position="8">Do <span class="animal-icon">🐼</span></div>
+                <h2 class="cards-title">🎴 可用卡片 🎴</h2>
+                <div class="cards-grid" id="cards-grid">
+                    <!-- 卡片會由JavaScript動態生成 -->
                 </div>
                 
                 <div class="controls">
-                    <div class="message info">
-                        把卡片拖到階梯上吧！從最低音的 Do 開始
+                    <div class="message info" id="message">
+                        拖動卡片到階梯上！每個階梯只能放一張卡片
                     </div>
                     
                     <div class="buttons">
                         <button id="check-btn">✅ 檢查答案</button>
+                        <button id="next-btn" style="display: none;">➡️ 下一關</button>
                         <button id="reset-btn">🔄 重新開始</button>
                     </div>
                     
@@ -411,7 +522,7 @@
                         <div class="progress-bar" id="progress-bar"></div>
                     </div>
                     <div class="level-indicator">
-                        完成度: <span id="progress-text">0%</span> | 已放置: <span id="placed-count">0</span>/8 張卡片
+                        完成度: <span id="progress-text">0%</span> | 已放置: <span id="placed-count">0</span>/<span id="total-slots">8</span> 個位置
                     </div>
                 </div>
             </div>
@@ -422,231 +533,532 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 遊戲狀態
             const gameState = {
-                steps: {
-                    1: null, // position: solfege
-                    2: null,
-                    3: null,
-                    4: null,
-                    5: null,
-                    6: null,
-                    7: null,
-                    8: null
-                },
-                correctOrder: {
-                    1: 'Do',
-                    2: 'Re',
-                    3: 'Mi',
-                    4: 'Fa',
-                    5: 'Sol',
-                    6: 'La',
-                    7: 'Ti',
-                    8: 'Do'
-                },
+                currentLevel: 1,
+                score: 0,
+                highScore: localStorage.getItem('solfegeHighScore') || 0,
+                challengeMode: null,
+                correctOrder: {},
+                availableCards: [],
+                totalSlots: 8,
+                steps: {},
                 placedCards: 0,
                 isComplete: false
             };
 
+            // 遊戲模式定義
+            const gameModes = [
+                {
+                    name: "經典模式",
+                    icon: "🎵",
+                    description: "完整的階梯挑戰",
+                    generateChallenge: generateClassicChallenge
+                },
+                {
+                    name: "填空挑戰",
+                    icon: "🧩",
+                    description: "部分位置已經有卡片",
+                    generateChallenge: generateFillInBlankChallenge
+                },
+                {
+                    name: "順序挑戰",
+                    icon: "🔢",
+                    description: "只提供部分唱名卡片",
+                    generateChallenge: generateLimitedCardsChallenge
+                },
+                {
+                    name: "倒序挑戰",
+                    icon: "🔄",
+                    description: "從最高音開始排序",
+                    generateChallenge: generateReverseChallenge
+                },
+                {
+                    name: "中間挑戰",
+                    icon: "🎯",
+                    description: "只排序中間的唱名",
+                    generateChallenge: generateMiddleChallenge
+                },
+                {
+                    name: "隨機挑戰",
+                    icon: "🎲",
+                    description: "完全隨機的階梯排列",
+                    generateChallenge: generateRandomChallenge
+                }
+            ];
+
+            // 唱名資料
+            const solfegeData = [
+                { name: "Do", color: "card-do", animal: "🐻", position: 1 },
+                { name: "Re", color: "card-re", animal: "🐰", position: 2 },
+                { name: "Mi", color: "card-mi", animal: "🐱", position: 3 },
+                { name: "Fa", color: "card-fa", animal: "🐸", position: 4 },
+                { name: "Sol", color: "card-sol", animal: "🐶", position: 5 },
+                { name: "La", color: "card-la", animal: "🦁", position: 6 },
+                { name: "Ti", color: "card-ti", animal: "🐯", position: 7 },
+                { name: "Do", color: "card-do", animal: "🐼", position: 8 }
+            ];
+
             // 元素引用
+            const modeIcon = document.getElementById('mode-icon');
+            const modeName = document.getElementById('mode-name');
+            const challengeDesc = document.getElementById('challenge-desc');
+            const instructionTitle = document.getElementById('instruction-title');
+            const instructionText = document.getElementById('instruction-text');
+            const challengeHint = document.getElementById('challenge-hint');
+            const levelCount = document.getElementById('level-count');
+            const scoreDisplay = document.getElementById('score');
+            const highScoreDisplay = document.getElementById('high-score');
             const steps = document.querySelectorAll('.step');
-            const cards = document.querySelectorAll('.solfege-card');
-            const messageDiv = document.querySelector('.message');
+            const cardsGrid = document.getElementById('cards-grid');
+            const messageDiv = document.getElementById('message');
             const checkBtn = document.getElementById('check-btn');
+            const nextBtn = document.getElementById('next-btn');
             const resetBtn = document.getElementById('reset-btn');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const placedCount = document.getElementById('placed-count');
+            const totalSlots = document.getElementById('total-slots');
 
-            // 初始化 - 設置卡片為可拖曳
-            cards.forEach(card => {
-                card.setAttribute('draggable', 'true');
-                card.addEventListener('dragstart', handleDragStart);
-                card.addEventListener('click', handleCardClick); // 也支援點擊
-            });
-
-            // 設置階梯為放置目標
-            steps.forEach(step => {
-                step.addEventListener('dragover', handleDragOver);
-                step.addEventListener('drop', handleDrop);
-                step.addEventListener('click', handleStepClick); // 也支援點擊
-            });
-
-            // 檢查答案按鈕
-            checkBtn.addEventListener('click', checkAnswer);
-
-            // 重新開始按鈕
-            resetBtn.addEventListener('click', resetGame);
-
-            // 更新進度顯示
-            function updateProgress() {
-                const progress = (gameState.placedCards / 8) * 100;
-                progressBar.style.width = `${progress}%`;
-                progressText.textContent = `${Math.round(progress)}%`;
-                placedCount.textContent = gameState.placedCards;
+            // 初始化遊戲
+            function initGame() {
+                gameState.highScore = localStorage.getItem('solfegeHighScore') || 0;
+                highScoreDisplay.textContent = gameState.highScore;
+                scoreDisplay.textContent = gameState.score;
+                levelCount.textContent = gameState.currentLevel;
                 
-                if (gameState.placedCards === 8) {
-                    messageDiv.textContent = "太棒了！所有卡片都放好了，現在檢查答案吧！";
-                    messageDiv.className = "message info";
+                // 隨機選擇一個遊戲模式
+                selectRandomMode();
+                startNewChallenge();
+                
+                // 設置事件監聽器
+                checkBtn.addEventListener('click', checkAnswer);
+                nextBtn.addEventListener('click', startNewChallenge);
+                resetBtn.addEventListener('click', resetChallenge);
+                
+                // 設置拖放事件
+                setupDragAndDrop();
+            }
+
+            // 隨機選擇遊戲模式
+            function selectRandomMode() {
+                const randomIndex = Math.floor(Math.random() * gameModes.length);
+                gameState.challengeMode = gameModes[randomIndex];
+                
+                // 更新介面顯示
+                modeIcon.textContent = gameState.challengeMode.icon;
+                modeName.textContent = gameState.challengeMode.name;
+                challengeDesc.textContent = gameState.challengeMode.description;
+                
+                // 更新說明文字
+                instructionTitle.textContent = `📚 ${gameState.challengeMode.name}：`;
+                instructionText.textContent = gameState.challengeMode.description;
+            }
+
+            // 開始新挑戰
+            function startNewChallenge() {
+                // 重置遊戲狀態
+                resetGameState();
+                
+                // 隱藏下一關按鈕
+                nextBtn.style.display = 'none';
+                checkBtn.style.display = 'block';
+                
+                // 生成挑戰
+                gameState.challengeMode.generateChallenge();
+                
+                // 更新介面
+                updateProgress();
+                updateMessage(`開始 ${gameState.challengeMode.name}！${getModeSpecificHint()}`, 'info');
+            }
+
+            // 生成經典挑戰（完整的階梯）
+            function generateClassicChallenge() {
+                gameState.totalSlots = 8;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 設置正確順序
+                solfegeData.forEach(item => {
+                    gameState.correctOrder[item.position] = item.name;
+                    gameState.steps[item.position] = null;
+                });
+                
+                // 所有卡片都可用
+                gameState.availableCards = [...solfegeData];
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新提示
+                challengeHint.textContent = "從最低的 Do 開始，一直到最高的 Do，按順序排列所有唱名";
+            }
+
+            // 生成填空挑戰（部分位置已經有卡片）
+            function generateFillInBlankChallenge() {
+                gameState.totalSlots = 8;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 設置正確順序
+                solfegeData.forEach(item => {
+                    gameState.correctOrder[item.position] = item.name;
+                    gameState.steps[item.position] = null;
+                });
+                
+                // 隨機選擇2-4個位置預先放置卡片
+                const preFilledCount = Math.floor(Math.random() * 3) + 2;
+                const positions = [1, 2, 3, 4, 5, 6, 7, 8];
+                shuffleArray(positions);
+                
+                const preFilledPositions = positions.slice(0, preFilledCount);
+                
+                // 預先放置卡片
+                preFilledPositions.forEach(pos => {
+                    const solfege = solfegeData.find(item => item.position === pos);
+                    gameState.steps[pos] = solfege.name;
+                    gameState.placedCards++;
+                });
+                
+                // 剩下的卡片作為可用卡片
+                gameState.availableCards = solfegeData.filter(item => 
+                    !preFilledPositions.includes(item.position)
+                );
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新階梯顯示
+                updateStaircaseDisplay();
+                
+                // 更新提示
+                challengeHint.textContent = `填空！已經有 ${preFilledCount} 個位置放好了，完成剩下的 ${8-preFilledCount} 個位置`;
+            }
+
+            // 生成有限卡片挑戰
+            function generateLimitedCardsChallenge() {
+                // 隨機選擇4-6個位置需要填充
+                const slotCount = Math.floor(Math.random() * 3) + 4;
+                gameState.totalSlots = slotCount;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 隨機選擇起始位置
+                const startPos = Math.floor(Math.random() * (9 - slotCount)) + 1;
+                
+                // 設置正確順序和階梯
+                for (let i = 0; i < slotCount; i++) {
+                    const pos = startPos + i;
+                    const solfege = solfegeData.find(item => item.position === pos);
+                    gameState.correctOrder[i+1] = solfege.name;
+                    gameState.steps[i+1] = null;
                 }
+                
+                // 只提供需要的卡片
+                gameState.availableCards = [];
+                for (let i = 0; i < slotCount; i++) {
+                    const pos = startPos + i;
+                    gameState.availableCards.push(solfegeData.find(item => item.position === pos));
+                }
+                
+                // 打亂卡片順序
+                shuffleArray(gameState.availableCards);
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新階梯顯示（隱藏不需要的階梯）
+                updateStaircaseVisibility(startPos, slotCount);
+                
+                // 更新提示
+                challengeHint.textContent = `排序這 ${slotCount} 個唱名！從 ${solfegeData.find(item => item.position === startPos).name} 開始`;
             }
 
-            // 拖曳開始
-            function handleDragStart(e) {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    solfege: this.dataset.solfege,
-                    position: this.dataset.position
-                }));
-                this.classList.add('dragging');
+            // 生成倒序挑戰
+            function generateReverseChallenge() {
+                gameState.totalSlots = 8;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 倒序排列
+                const reversedSolfege = [...solfegeData].reverse();
+                
+                reversedSolfege.forEach((item, index) => {
+                    gameState.correctOrder[index+1] = item.name;
+                    gameState.steps[index+1] = null;
+                });
+                
+                // 所有卡片都可用
+                gameState.availableCards = [...solfegeData];
+                shuffleArray(gameState.availableCards); // 打亂順序
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新提示
+                challengeHint.textContent = "從最高的 Do 開始，一直到最低的 Do，倒序排列所有唱名";
             }
 
-            // 拖曳經過
-            function handleDragOver(e) {
-                e.preventDefault();
+            // 生成中間挑戰
+            function generateMiddleChallenge() {
+                gameState.totalSlots = 5;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 只使用中間的5個唱名
+                const middleSolfege = solfegeData.slice(1, 6); // Re, Mi, Fa, Sol, La
+                
+                middleSolfege.forEach((item, index) => {
+                    gameState.correctOrder[index+1] = item.name;
+                    gameState.steps[index+1] = null;
+                });
+                
+                // 只提供中間的卡片
+                gameState.availableCards = [...middleSolfege];
+                shuffleArray(gameState.availableCards);
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新階梯顯示
+                updateStaircaseVisibility(2, 5);
+                
+                // 更新提示
+                challengeHint.textContent = "排序中間的5個唱名：從 Re 到 La";
+            }
+
+            // 生成隨機挑戰
+            function generateRandomChallenge() {
+                const slotCount = Math.floor(Math.random() * 4) + 5; // 5-8個位置
+                gameState.totalSlots = slotCount;
+                totalSlots.textContent = gameState.totalSlots;
+                
+                // 隨機選擇唱名（不重複）
+                const allSolfege = [...solfegeData];
+                shuffleArray(allSolfege);
+                const selectedSolfege = allSolfege.slice(0, slotCount);
+                
+                // 按原始位置排序選中的唱名
+                selectedSolfege.sort((a, b) => a.position - b.position);
+                
+                selectedSolfege.forEach((item, index) => {
+                    gameState.correctOrder[index+1] = item.name;
+                    gameState.steps[index+1] = null;
+                });
+                
+                // 提供卡片（打亂順序）
+                gameState.availableCards = [...selectedSolfege];
+                shuffleArray(gameState.availableCards);
+                
+                // 生成卡片
+                generateCards();
+                
+                // 更新階梯顯示
+                updateStaircaseVisibility(1, slotCount);
+                
+                // 更新提示
+                const solfegeNames = selectedSolfege.map(item => item.name).join(', ');
+                challengeHint.textContent = `排序這些唱名：${solfegeNames}`;
+            }
+
+            // 生成卡片
+            function generateCards() {
+                cardsGrid.innerHTML = '';
+                
+                gameState.availableCards.forEach((cardData, index) => {
+                    const card = document.createElement('div');
+                    card.className = `solfege-card ${cardData.color}`;
+                    card.dataset.solfege = cardData.name;
+                    card.dataset.position = cardData.position;
+                    card.dataset.cardId = index;
+                    
+                    card.innerHTML = `
+                        <div>${cardData.name}</div>
+                        <div class="animal-icon">${cardData.animal}</div>
+                    `;
+                    
+                    card.setAttribute('draggable', 'true');
+                    cardsGrid.appendChild(card);
+                });
+            }
+
+            // 更新階梯顯示
+            function updateStaircaseDisplay() {
+                steps.forEach(step => {
+                    const pos = parseInt(step.dataset.position);
+                    const solfege = gameState.steps[pos];
+                    
+                    if (solfege) {
+                        const cardData = solfegeData.find(item => item.name === solfege && item.position === pos);
+                        step.innerHTML = `
+                            <span class="step-label">${pos === 1 ? '最低音' : pos === 8 ? '最高音' : `第${pos}階`}</span>
+                            <div class="step-number">${pos}</div>
+                            <div style="font-size: 1.8rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);">
+                                ${solfege} <span class="animal-icon">${cardData.animal}</span>
+                            </div>
+                        `;
+                        step.classList.add('filled');
+                        step.style.background = getCardColor(solfege);
+                    } else {
+                        step.innerHTML = `
+                            <span class="step-label">${pos === 1 ? '最低音' : pos === 8 ? '最高音' : `第${pos}階`}</span>
+                            <div class="step-number">${pos}</div>
+                        `;
+                        step.classList.remove('filled');
+                        step.style.background = 'white';
+                    }
+                });
+            }
+
+            // 更新階梯可見性
+            function updateStaircaseVisibility(startPos, count) {
+                steps.forEach(step => {
+                    const pos = parseInt(step.dataset.position);
+                    if (pos >= startPos && pos < startPos + count) {
+                        step.style.display = 'flex';
+                        // 更新標籤
+                        const stepLabel = step.querySelector('.step-label');
+                        if (stepLabel) {
+                            if (pos === startPos) stepLabel.textContent = '開始';
+                            else if (pos === startPos + count - 1) stepLabel.textContent = '結束';
+                            else stepLabel.textContent = `第${pos-startPos+1}步`;
+                        }
+                    } else {
+                        step.style.display = 'none';
+                    }
+                });
+            }
+
+            // 設置拖放功能
+            function setupDragAndDrop() {
+                // 卡片拖放事件
+                document.addEventListener('dragstart', function(e) {
+                    if (e.target.classList.contains('solfege-card')) {
+                        const card = e.target;
+                        e.dataTransfer.setData('text/plain', JSON.stringify({
+                            solfege: card.dataset.solfege,
+                            position: card.dataset.position,
+                            cardId: card.dataset.cardId
+                        }));
+                        card.classList.add('dragging');
+                    }
+                });
+
+                document.addEventListener('dragend', function(e) {
+                    if (e.target.classList.contains('solfege-card')) {
+                        e.target.classList.remove('dragging');
+                    }
+                });
+
+                // 階梯放置事件
+                steps.forEach(step => {
+                    step.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                    });
+
+                    step.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        if (gameState.isComplete) return;
+                        
+                        const stepElement = this;
+                        const stepPosition = parseInt(stepElement.dataset.position);
+                        
+                        // 檢查是否是有效的階梯位置
+                        if (stepPosition > gameState.totalSlots) return;
+                        
+                        // 檢查是否已經有卡片
+                        if (gameState.steps[stepPosition]) {
+                            updateMessage(`這個位置已經有卡片了！`, 'warning');
+                            return;
+                        }
+                        
+                        // 獲取拖曳數據
+                        const dataText = e.dataTransfer.getData('text/plain');
+                        if (!dataText) return;
+                        
+                        const data = JSON.parse(dataText);
+                        placeCard(stepElement, stepPosition, data);
+                    });
+                    
+                    // 點擊移除卡片
+                    step.addEventListener('click', function() {
+                        if (gameState.isComplete) return;
+                        
+                        const stepPosition = parseInt(this.dataset.position);
+                        if (gameState.steps[stepPosition]) {
+                            removeCard(stepPosition);
+                        }
+                    });
+                });
             }
 
             // 放置卡片
-            function handleDrop(e) {
-                e.preventDefault();
-                const step = this;
-                const stepPosition = parseInt(step.dataset.position);
-                
-                // 檢查是否已經有卡片在這個位置
-                if (gameState.steps[stepPosition]) {
-                    messageDiv.textContent = "這裡已經有卡片了！試試其他位置。";
-                    messageDiv.className = "message info";
-                    return;
-                }
-                
-                // 獲取拖曳的數據
-                const dataText = e.dataTransfer.getData('text/plain');
-                if (!dataText) return;
-                
-                const data = JSON.parse(dataText);
-                const cardSolfege = data.solfege;
-                const cardPosition = parseInt(data.position);
-                
-                // 放置卡片到階梯上
-                placeCardOnStep(step, cardSolfege, cardPosition, stepPosition);
-            }
-
-            // 點擊卡片（備用互動方式）
-            function handleCardClick() {
-                const card = this;
-                const cardSolfege = card.dataset.solfege;
-                const cardPosition = parseInt(card.dataset.position);
-                
-                // 尋找第一個空階梯
-                for (let i = 1; i <= 8; i++) {
-                    if (!gameState.steps[i]) {
-                        const step = document.querySelector(`.step[data-position="${i}"]`);
-                        placeCardOnStep(step, cardSolfege, cardPosition, i);
-                        break;
-                    }
-                }
-            }
-
-            // 點擊階梯（移除卡片）
-            function handleStepClick() {
-                const stepPosition = parseInt(this.dataset.position);
-                const currentSolfege = gameState.steps[stepPosition];
-                
-                if (currentSolfege) {
-                    // 移除卡片
-                    removeCardFromStep(this, stepPosition);
-                }
-            }
-
-            // 放置卡片到階梯的函數
-            function placeCardOnStep(step, cardSolfege, cardPosition, stepPosition) {
-                // 檢查卡片是否已被使用
-                const cardElement = document.querySelector(`.solfege-card[data-position="${cardPosition}"]`);
-                if (cardElement.style.opacity === '0.3') {
-                    messageDiv.textContent = "這張卡片已經被用過了！";
-                    messageDiv.className = "message info";
-                    return;
-                }
-                
+            function placeCard(stepElement, stepPosition, cardData) {
                 // 更新遊戲狀態
-                gameState.steps[stepPosition] = cardSolfege;
+                gameState.steps[stepPosition] = cardData.solfege;
                 gameState.placedCards++;
                 
-                // 更新階梯外觀
-                step.innerHTML = `
-                    <span class="step-label">${cardSolfege}</span>
+                // 更新階梯顯示
+                const cardInfo = solfegeData.find(item => 
+                    item.name === cardData.solfege && item.position === parseInt(cardData.position)
+                );
+                
+                stepElement.innerHTML = `
+                    <span class="step-label">${stepPosition === 1 ? '最低音' : stepPosition === gameState.totalSlots ? '最高音' : `第${stepPosition}步`}</span>
                     <div class="step-number">${stepPosition}</div>
-                    <div style="font-size: 2rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);">
-                        ${cardSolfege} <span class="animal-icon">${getAnimalIcon(cardSolfege)}</span>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);">
+                        ${cardData.solfege} <span class="animal-icon">${cardInfo.animal}</span>
                     </div>
                 `;
-                step.classList.add('filled');
-                step.style.background = getCardColor(cardSolfege);
+                stepElement.classList.add('filled');
+                stepElement.style.background = getCardColor(cardData.solfege);
                 
                 // 標記卡片為已使用
-                cardElement.style.opacity = '0.3';
-                cardElement.style.cursor = 'not-allowed';
-                cardElement.setAttribute('draggable', 'false');
+                const cardElement = document.querySelector(`.solfege-card[data-card-id="${cardData.cardId}"]`);
+                if (cardElement) {
+                    cardElement.style.opacity = '0.3';
+                    cardElement.style.cursor = 'not-allowed';
+                    cardElement.setAttribute('draggable', 'false');
+                }
                 
-                // 顯示反饋訊息
-                const positionNames = ['最低音', '第2階', '第3階', '第4階', '第5階', '第6階', '第7階', '最高音'];
-                messageDiv.textContent = `太好了！你把 ${cardSolfege} 放到了 ${positionNames[stepPosition-1]}！`;
-                messageDiv.className = "message info";
-                
+                // 更新訊息
+                updateMessage(`放好了 ${cardData.solfege}！繼續加油！`, 'info');
                 updateProgress();
+                
+                // 檢查是否完成
+                if (gameState.placedCards >= gameState.totalSlots) {
+                    updateMessage(`所有位置都放好了！點擊「檢查答案」看看對不對！`, 'info');
+                }
             }
 
-            // 從階梯移除卡片的函數
-            function removeCardFromStep(step, stepPosition) {
+            // 移除卡片
+            function removeCard(stepPosition) {
                 const solfege = gameState.steps[stepPosition];
+                if (!solfege) return;
                 
-                // 重置遊戲狀態
+                // 更新遊戲狀態
                 gameState.steps[stepPosition] = null;
                 gameState.placedCards--;
                 
-                // 重置階梯外觀
-                step.innerHTML = `
-                    <span class="step-label">${stepPosition === 1 ? '最低音' : stepPosition === 8 ? '最高音' : `第${stepPosition}階`}</span>
+                // 更新階梯顯示
+                const stepElement = document.querySelector(`.step[data-position="${stepPosition}"]`);
+                stepElement.innerHTML = `
+                    <span class="step-label">${stepPosition === 1 ? '最低音' : stepPosition === gameState.totalSlots ? '最高音' : `第${stepPosition}步`}</span>
                     <div class="step-number">${stepPosition}</div>
                 `;
-                step.classList.remove('filled');
-                step.style.background = 'white';
+                stepElement.classList.remove('filled');
+                stepElement.style.background = 'white';
                 
                 // 恢復卡片
-                const cardPosition = getCardPositionBySolfege(solfege, stepPosition);
-                const cardElement = document.querySelector(`.solfege-card[data-position="${cardPosition}"]`);
-                if (cardElement) {
+                const cardData = solfegeData.find(item => item.name === solfege);
+                const cardElement = document.querySelector(`.solfege-card[data-solfege="${solfege}"]`);
+                if (cardElement && cardElement.style.opacity === '0.3') {
                     cardElement.style.opacity = '1';
                     cardElement.style.cursor = 'grab';
                     cardElement.setAttribute('draggable', 'true');
                 }
                 
-                messageDiv.textContent = `你移除了 ${solfege}，試試看其他位置吧！`;
-                messageDiv.className = "message info";
-                
+                updateMessage(`移除了 ${solfege}，再試試看！`, 'info');
                 updateProgress();
-            }
-
-            // 根據唱名和位置獲取卡片位置（處理兩個Do的情況）
-            function getCardPositionBySolfege(solfege, stepPosition) {
-                if (solfege === 'Do') {
-                    return stepPosition === 1 ? '1' : '8';
-                }
-                
-                const solfegeToPosition = {
-                    'Re': '2',
-                    'Mi': '3',
-                    'Fa': '4',
-                    'Sol': '5',
-                    'La': '6',
-                    'Ti': '7'
-                };
-                
-                return solfegeToPosition[solfege];
             }
 
             // 檢查答案
             function checkAnswer() {
-                if (gameState.placedCards < 8) {
-                    messageDiv.textContent = "還有卡片沒放完哦！繼續加油！";
-                    messageDiv.className = "message info";
+                if (gameState.placedCards < gameState.totalSlots) {
+                    updateMessage(`還有位置沒放卡片哦！`, 'warning');
                     return;
                 }
                 
@@ -654,7 +1066,7 @@
                 let wrongPositions = [];
                 
                 // 檢查每個位置
-                for (let i = 1; i <= 8; i++) {
+                for (let i = 1; i <= gameState.totalSlots; i++) {
                     if (gameState.steps[i] === gameState.correctOrder[i]) {
                         correctCount++;
                     } else {
@@ -662,73 +1074,121 @@
                     }
                 }
                 
+                // 計算分數
+                const levelScore = correctCount * 10;
+                gameState.score += levelScore;
+                scoreDisplay.textContent = gameState.score;
+                
+                // 更新最高分
+                if (gameState.score > gameState.highScore) {
+                    gameState.highScore = gameState.score;
+                    localStorage.setItem('solfegeHighScore', gameState.highScore);
+                    highScoreDisplay.textContent = gameState.highScore;
+                }
+                
                 // 顯示結果
-                if (correctCount === 8) {
-                    messageDiv.innerHTML = "🎉 <strong>太棒了！完全正確！</strong> 🎉<br>你已經掌握了唱名階梯！";
-                    messageDiv.className = "message success";
+                if (correctCount === gameState.totalSlots) {
+                    updateMessage(`🎉 太棒了！完全正確！ 🎉 獲得 ${levelScore} 分！`, 'success');
+                    gameState.isComplete = true;
+                    
+                    // 顯示下一關按鈕
+                    nextBtn.style.display = 'block';
+                    checkBtn.style.display = 'none';
                     
                     // 慶祝動畫
-                    steps.forEach(step => {
-                        step.classList.add('celebrate');
+                    document.querySelectorAll('.step').forEach(step => {
+                        if (step.style.display !== 'none') {
+                            step.classList.add('celebrate');
+                        }
                     });
                     
-                    setTimeout(() => {
-                        steps.forEach(step => {
-                            step.classList.remove('celebrate');
-                        });
-                    }, 1500);
+                    // 更新等級
+                    gameState.currentLevel++;
+                    levelCount.textContent = gameState.currentLevel;
                 } else {
-                    messageDiv.innerHTML = `答對了 ${correctCount} 個，還有 ${8-correctCount} 個位置需要調整。<br>檢查一下第 ${wrongPositions.join(', ')} 階吧！`;
-                    messageDiv.className = "message info";
+                    const correctPercent = Math.round((correctCount / gameState.totalSlots) * 100);
+                    updateMessage(`答對了 ${correctCount}/${gameState.totalSlots} 個 (${correctPercent}%)，獲得 ${levelScore} 分。位置 ${wrongPositions.join(', ')} 需要調整。`, 'warning');
                     
-                    // 標記錯誤的位置
+                    // 標記錯誤位置
                     wrongPositions.forEach(pos => {
                         const step = document.querySelector(`.step[data-position="${pos}"]`);
-                        step.style.border = '4px solid #ff6b6b';
-                        step.style.animation = 'none';
-                        
-                        setTimeout(() => {
-                            step.style.border = '4px solid #ffd93d';
-                        }, 1000);
+                        if (step) {
+                            step.style.border = '4px solid #ff6b6b';
+                            setTimeout(() => {
+                                step.style.border = '4px solid transparent';
+                            }, 1000);
+                        }
                     });
                 }
             }
 
-            // 重新開始遊戲
-            function resetGame() {
-                // 重置遊戲狀態
+            // 重置挑戰
+            function resetChallenge() {
+                resetGameState();
+                gameState.challengeMode.generateChallenge();
+                updateProgress();
+                updateMessage(`重新開始 ${gameState.challengeMode.name}！`, 'info');
+            }
+
+            // 重置遊戲狀態
+            function resetGameState() {
+                gameState.steps = {};
+                gameState.placedCards = 0;
+                gameState.isComplete = false;
+                
+                // 重置所有階梯位置
                 for (let i = 1; i <= 8; i++) {
                     gameState.steps[i] = null;
                 }
-                gameState.placedCards = 0;
                 
-                // 重置階梯
+                // 顯示所有階梯
                 steps.forEach(step => {
-                    const position = parseInt(step.dataset.position);
+                    step.style.display = 'flex';
+                    const pos = parseInt(step.dataset.position);
                     step.innerHTML = `
-                        <span class="step-label">${position === 1 ? '最低音' : position === 8 ? '最高音' : `第${position}階`}</span>
-                        <div class="step-number">${position}</div>
+                        <span class="step-label">${pos === 1 ? '最低音' : pos === 8 ? '最高音' : `第${pos}階`}</span>
+                        <div class="step-number">${pos}</div>
                     `;
                     step.classList.remove('filled');
                     step.style.background = 'white';
                     step.style.border = '4px solid transparent';
                 });
-                
-                // 重置卡片
-                cards.forEach(card => {
-                    card.style.opacity = '1';
-                    card.style.cursor = 'grab';
-                    card.setAttribute('draggable', 'true');
-                });
-                
-                // 重置訊息
-                messageDiv.textContent = "遊戲已重置！把卡片拖到階梯上吧！從最低音的 Do 開始";
-                messageDiv.className = "message info";
-                
-                updateProgress();
             }
 
-            // 輔助函數：根據唱名獲取顏色
+            // 更新進度
+            function updateProgress() {
+                const progress = (gameState.placedCards / gameState.totalSlots) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${Math.round(progress)}%`;
+                placedCount.textContent = gameState.placedCards;
+            }
+
+            // 更新訊息
+            function updateMessage(text, type = 'info') {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+            }
+
+            // 獲取模式特定提示
+            function getModeSpecificHint() {
+                switch(gameState.challengeMode.name) {
+                    case "倒序挑戰": return "記住要從高音往低音排哦！";
+                    case "填空挑戰": return "看看哪些位置已經有提示了！";
+                    case "隨機挑戰": return "這次的順序很特別，仔細想想！";
+                    default: return "仔細觀察卡片的位置關係！";
+                }
+            }
+
+            // 輔助函數：洗牌陣列
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // 輔助函數：獲取卡片顏色
             function getCardColor(solfege) {
                 const colorMap = {
                     'Do': 'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
@@ -742,22 +1202,8 @@
                 return colorMap[solfege] || '#ffffff';
             }
 
-            // 輔助函數：根據唱名獲取動物圖標
-            function getAnimalIcon(solfege) {
-                const iconMap = {
-                    'Do': '🐻',
-                    'Re': '🐰',
-                    'Mi': '🐱',
-                    'Fa': '🐸',
-                    'Sol': '🐶',
-                    'La': '🦁',
-                    'Ti': '🐯'
-                };
-                return iconMap[solfege] || '🎵';
-            }
-
-            // 初始更新進度
-            updateProgress();
+            // 初始化遊戲
+            initGame();
         });
     </script>
 </body>
