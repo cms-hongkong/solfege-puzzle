@@ -1,14 +1,52 @@
 document.addEventListener('DOMContentLoaded', function() {
     // ============================================
-    // 音效合成器 (Web Audio API)
+    // 音效合成器 (Web Audio API) 及解鎖機制
     // ============================================
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = new AudioContext();
+    let audioCtx = null;
+    let isAudioUnlocked = false;
 
-    function playTone(frequency) {
+    // 初始化並解鎖 AudioContext
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new AudioContext();
+        }
+        // 如果 AudioContext 被瀏覽器暫停咗，就喚醒佢
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
+        isAudioUnlocked = true;
+    }
+
+    // 監聽全域點擊事件，確保使用者同網頁互動後解鎖音效
+    document.body.addEventListener('click', function unlockAudio() {
+        if (!isAudioUnlocked) {
+            initAudio();
+            // 可以選擇喺第一次解鎖時播放一個非常短暫嘅無聲，確保啟動
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            gainNode.gain.value = 0; // 無聲
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+            
+            // 解鎖後移除呢個監聽器，避免每次點擊都執行
+            document.body.removeEventListener('click', unlockAudio);
+            console.log("音效已解鎖！");
+        }
+    }, { once: true });
+
+
+    function playTone(frequency) {
+        // 確保音效引擎已經準備好
+        if (!audioCtx) {
+            initAudio();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         
@@ -118,12 +156,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupCardEvents() {
         const cards = document.querySelectorAll('.solfege-card');
         cards.forEach(card => {
-            // 點擊時先發聲
+            // 改用 mousedown 同 touchstart 來觸發發聲，反應更靈敏
             card.addEventListener('mousedown', function(e) {
                 if(gameState.isComplete || card.style.opacity === '0.3') return;
                 playTone(parseFloat(card.dataset.freq));
             });
-            // 手機觸控支援
+            
             card.addEventListener('touchstart', function(e) {
                 if(gameState.isComplete || card.style.opacity === '0.3') return;
                 playTone(parseFloat(card.dataset.freq));
@@ -208,7 +246,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // 點擊自動放入最近的空格
         for (let i = 0; i < gameState.currentPositions.length; i++) {
             const pos = gameState.currentPositions[i];
             if (!gameState.steps[pos]) {
@@ -347,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function placeCard(stepElement, stepPosition, cardData) {
-        // 放下時播放該音符
+        // 放下時嘗試播放
         playTone(parseFloat(cardData.freq));
 
         gameState.steps[stepPosition] = cardData.solfege;
