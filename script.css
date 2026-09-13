@@ -1,86 +1,75 @@
 document.addEventListener('DOMContentLoaded', function() {
     // ============================================
-    // 音效合成器 (Web Audio API) 及解鎖機制
+    // 1. 音效合成器 (加入安全防死機機制)
     // ============================================
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
-    let isAudioUnlocked = false;
 
-    // 初始化並解鎖 AudioContext
     function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new AudioContext();
+        try {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch (e) {
+            console.warn("音效解鎖失敗，但不會影響遊戲運行:", e);
         }
-        // 如果 AudioContext 被瀏覽器暫停咗，就喚醒佢
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        isAudioUnlocked = true;
     }
 
-    // 監聽全域點擊事件，確保使用者同網頁互動後解鎖音效
-    document.body.addEventListener('click', function unlockAudio() {
-        if (!isAudioUnlocked) {
-            initAudio();
-            // 可以選擇喺第一次解鎖時播放一個非常短暫嘅無聲，確保啟動
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            gainNode.gain.value = 0; // 無聲
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
-            
-            // 解鎖後移除呢個監聽器，避免每次點擊都執行
-            document.body.removeEventListener('click', unlockAudio);
-            console.log("音效已解鎖！");
-        }
-    }, { once: true });
-
+    // 任何點擊都會嘗試解鎖音效，符合瀏覽器安全要求
+    document.body.addEventListener('click', initAudio, { once: true });
+    document.body.addEventListener('touchstart', initAudio, { once: true, passive: true });
 
     function playTone(frequency) {
-        // 確保音效引擎已經準備好
-        if (!audioCtx) {
-            initAudio();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        try {
+            initAudio(); // 確保已解鎖
+            if (!audioCtx) return;
 
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        
-        oscillator.type = 'sine'; // 圓滑的聲音，適合表示音階
-        oscillator.frequency.value = frequency;
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        oscillator.start();
-        // 讓聲音漸漸消失，不會有爆音
-        gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-        oscillator.stop(audioCtx.currentTime + 1);
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+            oscillator.stop(audioCtx.currentTime + 1);
+        } catch (e) {
+            console.warn("聲音播放被阻擋:", e);
+        }
     }
 
     // ============================================
-    // 固定的階梯-唱名配對與頻率 (C Major Scale)
+    // 2. 遊戲資料設定
     // ============================================
     const FIXED_PAIRING = {
-        1: "Do",
-        2: "Re",
-        3: "Mi",
-        4: "Fa",
-        5: "Sol",
-        6: "La",
-        7: "Ti",
-        8: "Do"
+        1: "Do", 2: "Re", 3: "Mi", 4: "Fa", 
+        5: "Sol", 6: "La", 7: "Ti", 8: "Do"
     };
+
+    const solfegeData = [
+        { name: "Do", color: "card-do", animal: "🐻", correctPosition: 1, freq: 261.63 },
+        { name: "Re", color: "card-re", animal: "🐰", correctPosition: 2, freq: 293.66 },
+        { name: "Mi", color: "card-mi", animal: "🐱", correctPosition: 3, freq: 329.63 },
+        { name: "Fa", color: "card-fa", animal: "🐸", correctPosition: 4, freq: 349.23 },
+        { name: "Sol", color: "card-sol", animal: "🐶", correctPosition: 5, freq: 392.00 },
+        { name: "La", color: "card-la", animal: "🦁", correctPosition: 6, freq: 440.00 },
+        { name: "Ti", color: "card-ti", animal: "🐯", correctPosition: 7, freq: 493.88 },
+        { name: "Do", color: "card-do", animal: "🐼", correctPosition: 8, freq: 523.25 }
+    ];
 
     const gameState = {
         currentChallenge: 1,
         score: 0,
-        highScore: localStorage.getItem('solfegeHighScore') || 0,
+        highScore: 0,
         currentPositions: [],
         correctOrder: {},
         availableCards: [],
@@ -90,18 +79,16 @@ document.addEventListener('DOMContentLoaded', function() {
         isComplete: false
     };
 
-    // 真實的音高頻率 (Hz)
-    const solfegeData = [
-        { name: "Do", color: "card-do", animal: "🐻", correctPosition: 1, freq: 261.63 }, // C4
-        { name: "Re", color: "card-re", animal: "🐰", correctPosition: 2, freq: 293.66 }, // D4
-        { name: "Mi", color: "card-mi", animal: "🐱", correctPosition: 3, freq: 329.63 }, // E4
-        { name: "Fa", color: "card-fa", animal: "🐸", correctPosition: 4, freq: 349.23 }, // F4
-        { name: "Sol", color: "card-sol", animal: "🐶", correctPosition: 5, freq: 392.00 }, // G4
-        { name: "La", color: "card-la", animal: "🦁", correctPosition: 6, freq: 440.00 }, // A4
-        { name: "Ti", color: "card-ti", animal: "🐯", correctPosition: 7, freq: 493.88 }, // B4
-        { name: "Do", color: "card-do", animal: "🐼", correctPosition: 8, freq: 523.25 }  // C5 (高八度)
-    ];
+    // 安全讀取最高分 (防止瀏覽器阻擋 LocalStorage 導致死機)
+    try {
+        gameState.highScore = localStorage.getItem('solfegeHighScore') || 0;
+    } catch (e) {
+        console.warn("無法讀取最高分紀錄");
+    }
 
+    // ============================================
+    // 3. 取得 HTML 元素
+    // ============================================
     const modeIcon = document.getElementById('mode-icon');
     const modeName = document.getElementById('mode-name');
     const challengeDesc = document.getElementById('challenge-desc');
@@ -124,8 +111,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const challengeNumber = document.getElementById('challenge-number');
     const challengeType = document.getElementById('challenge-type');
 
+    // ============================================
+    // 4. 遊戲主要邏輯
+    // ============================================
     function initGame() {
-        gameState.highScore = localStorage.getItem('solfegeHighScore') || 0;
+        if (!cardsGrid) {
+            console.error("找不到卡片區域！請檢查 index.html 是否完整。");
+            return;
+        }
+
         highScoreDisplay.textContent = gameState.highScore;
         scoreDisplay.textContent = gameState.score;
         challengeCount.textContent = gameState.currentChallenge;
@@ -145,18 +139,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initDragAndDrop() {
-        document.addEventListener('dragover', function(e) {
-            e.preventDefault();
-        });
-        document.addEventListener('drop', function(e) {
-            e.preventDefault();
-        });
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => e.preventDefault());
     }
 
     function setupCardEvents() {
         const cards = document.querySelectorAll('.solfege-card');
         cards.forEach(card => {
-            // 改用 mousedown 同 touchstart 來觸發發聲，反應更靈敏
             card.addEventListener('mousedown', function(e) {
                 if(gameState.isComplete || card.style.opacity === '0.3') return;
                 playTone(parseFloat(card.dataset.freq));
@@ -195,9 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.dataTransfer.setData('application/json', JSON.stringify(data));
         e.dataTransfer.effectAllowed = 'move';
         card.classList.add('dragging');
-        setTimeout(() => {
-            card.style.opacity = '0.4';
-        }, 0);
+        setTimeout(() => card.style.opacity = '0.4', 0);
     }
 
     function handleDragOver(e) {
@@ -219,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         step.style.boxShadow = '';
         const stepPosition = parseInt(step.dataset.position);
+        
         if (!gameState.currentPositions.includes(stepPosition)) {
             updateMessage(`第${stepPosition}階不在當前挑戰中！`, 'warning');
             return;
@@ -227,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateMessage(`第${stepPosition}階已經有卡片了！`, 'warning');
             return;
         }
+        
         const dataText = e.dataTransfer.getData('application/json');
         if (!dataText) return;
         try {
@@ -290,10 +279,12 @@ document.addEventListener('DOMContentLoaded', function() {
         gameState.totalSlots = numSlots;
         totalSlots.textContent = numSlots;
         resetStaircaseDisplay();
+        
         const allPositions = [1, 2, 3, 4, 5, 6, 7, 8];
         shuffleArray(allPositions);
         gameState.currentPositions = allPositions.slice(0, numSlots);
         gameState.currentPositions.sort((a, b) => a - b);
+        
         gameState.correctOrder = {};
         gameState.currentPositions.forEach(pos => {
             gameState.correctOrder[pos] = FIXED_PAIRING[pos];
@@ -306,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ...item,
                 cardId: `card-${index}`
             }));
+            
         shuffleArray(gameState.availableCards);
         generateCards();
         updateCurrentChallengeDisplay();
@@ -332,17 +324,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const positions = gameState.currentPositions;
         let typeName = "隨機聽音";
         const isConsecutive = positions.every((pos, index, arr) => index === 0 || pos === arr[index-1] + 1);
-        if (isConsecutive) {
-            typeName = `連續音階`;
-        } else if (positions.every(pos => pos % 2 === 1)) {
-            typeName = "跳躍音階(奇數)";
-        } else if (positions.every(pos => pos % 2 === 0)) {
-            typeName = "跳躍音階(偶數)";
-        }
+        if (isConsecutive) typeName = `連續音階`;
+        else if (positions.every(pos => pos % 2 === 1)) typeName = "跳躍音階(奇數)";
+        else if (positions.every(pos => pos % 2 === 0)) typeName = "跳躍音階(偶數)";
         challengeType.textContent = typeName;
     }
 
     function generateCards() {
+        if (!cardsGrid) return;
         cardsGrid.innerHTML = '';
         gameState.availableCards.forEach((cardData) => {
             const card = document.createElement('div');
@@ -384,7 +373,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function placeCard(stepElement, stepPosition, cardData) {
-        // 放下時嘗試播放
         playTone(parseFloat(cardData.freq));
 
         gameState.steps[stepPosition] = cardData.solfege;
@@ -421,6 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!solfege) return;
         gameState.steps[stepPosition] = null;
         gameState.placedCards--;
+        
         const stepElement = document.querySelector(`.step[data-position="${stepPosition}"]`);
         stepElement.innerHTML = `
             <span class="step-label">第${stepPosition}階</span>
@@ -444,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function playCurrentStaircase() {
         playStaircaseBtn.disabled = true;
         let delay = 0;
-        
         const sortedPositions = [...gameState.currentPositions].sort((a,b) => a - b);
         
         sortedPositions.forEach((pos) => {
@@ -478,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateMessage(`還有位置沒放卡片哦！`, 'warning');
             return;
         }
+        
         let correctCount = 0;
         let wrongPositions = [];
         
@@ -501,40 +490,35 @@ document.addEventListener('DOMContentLoaded', function() {
         gameState.score += challengeScore;
         scoreDisplay.textContent = gameState.score;
         
-        if (gameState.score > gameState.highScore) {
-            gameState.highScore = gameState.score;
-            localStorage.setItem('solfegeHighScore', gameState.highScore);
-            highScoreDisplay.textContent = gameState.highScore;
-        }
+        try {
+            if (gameState.score > gameState.highScore) {
+                gameState.highScore = gameState.score;
+                localStorage.setItem('solfegeHighScore', gameState.highScore);
+                highScoreDisplay.textContent = gameState.highScore;
+            }
+        } catch(e) {}
         
         if (correctCount === gameState.totalSlots) {
-            updateMessage(`🎉 完美！所有音符都排啱咗！聽下你排嘅音階！`, 'success');
+            updateMessage(`🎉 完美！聽下你排嘅音階！`, 'success');
             gameState.isComplete = true;
             nextBtn.style.display = 'block';
             checkBtn.style.display = 'none';
             playStaircaseBtn.style.display = 'none';
             
             document.querySelectorAll('.step').forEach(step => {
-                if (step.style.display !== 'none') {
-                    step.classList.add('celebrate');
-                }
+                if (step.style.display !== 'none') step.classList.add('celebrate');
             });
             
             setTimeout(() => playCurrentStaircase(), 500);
-            
             gameState.currentChallenge++;
             challengeCount.textContent = gameState.currentChallenge;
         } else {
-            const correctPercent = Math.round((correctCount / gameState.totalSlots) * 100);
-            updateMessage(`答對了 ${correctCount}/${gameState.totalSlots} 個！有啲音符好似唔太啱音，點擊「聽聽階梯」再試下？`, 'warning');
-            
+            updateMessage(`答對了 ${correctCount}/${gameState.totalSlots} 個！點擊「聽聽階梯」聽下邊度唔啱音？`, 'warning');
             wrongPositions.forEach(pos => {
                 const step = document.querySelector(`.step[data-position="${pos}"]`);
                 if (step) {
                     step.style.border = '4px solid #ff6b6b';
-                    setTimeout(() => {
-                        step.style.border = '4px solid transparent';
-                    }, 1500);
+                    setTimeout(() => step.style.border = '4px solid transparent', 1500);
                 }
             });
         }
@@ -549,11 +533,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function resetGameState() {
-        gameState.currentPositions.forEach(pos => {
-            gameState.steps[pos] = null;
-        });
+        gameState.currentPositions.forEach(pos => gameState.steps[pos] = null);
         gameState.placedCards = 0;
         gameState.isComplete = false;
+        
         const cards = document.querySelectorAll('.solfege-card');
         cards.forEach(card => {
             card.style.opacity = '1';
@@ -570,6 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateMessage(text, type = 'info') {
+        if (!messageDiv) return;
         messageDiv.textContent = text;
         messageDiv.className = `message ${type}`;
     }
@@ -595,5 +579,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return colorMap[solfege] || '#ffffff';
     }
 
+    // 啟動遊戲
     initGame();
 });
