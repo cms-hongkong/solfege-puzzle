@@ -11,7 +11,6 @@
         /* 共同容器樣式 */
         .screen-container { width: 100%; max-width: 1000px; background-color: rgba(255, 255, 255, 0.95); border-radius: 25px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); overflow: hidden; padding: 30px; display: none; }
         .screen-container.active { display: block; animation: fadeIn 0.5s ease; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         header { text-align: center; margin-bottom: 25px; }
@@ -28,6 +27,8 @@
         .diff-btn.active { border-color: #ff9a3d; background: #fff9e6; color: #ff9a3d; transform: scale(1.05); }
         .start-btn { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; padding: 15px; font-size: 1.5rem; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s; }
         .start-btn:hover { transform: translateY(-3px); }
+        .leaderboard-entry-btn { background: linear-gradient(135deg, #ff9a3d, #ff6b6b); color: white; padding: 12px; font-size: 1.2rem; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .leaderboard-entry-btn:hover { transform: translateY(-3px); }
 
         /* ================= 遊戲畫面 ================= */
         .game-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #e9f5ff; border-radius: 15px; padding: 15px; flex-wrap: wrap; gap: 15px; }
@@ -77,16 +78,29 @@
         .correct-feedback, .incorrect-feedback { position: absolute; top: -10px; right: -10px; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
         .correct-feedback { background: #4CAF50; }
         .incorrect-feedback { background: #f44336; }
-        .challenge-counter { text-align: center; font-size: 1.2rem; margin-top: 10px; color: #6a11cb; font-weight: bold; }
         @keyframes celebrate { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .celebrate { animation: celebrate 0.5s ease 3; }
 
         /* ================= 結算畫面 ================= */
         .result-card { background: #fff9e6; border: 4px dashed #ff9a3d; border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 25px; }
         .result-name { font-size: 2rem; color: #6a11cb; margin-bottom: 15px; }
-        .result-stats { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; font-size: 1.3rem; }
+        .result-stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; font-size: 1.3rem; flex-wrap: wrap; }
         .stat-box { background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 5px 10px rgba(0,0,0,0.1); font-weight: bold; }
         .result-feedback { font-size: 1.5rem; color: #f12711; font-weight: bold; background: white; padding: 20px; border-radius: 15px; border-left: 10px solid #f12711; }
+        .end-btn-group { display: flex; gap: 15px; justify-content: center; }
+
+        /* ================= 排行榜畫面 ================= */
+        .leaderboard-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; border: 2px solid #6a11cb; background: white; color: #6a11cb; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active { background: #6a11cb; color: white; }
+        .table-container { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .leaderboard-table th { background: #e9f5ff; padding: 15px; color: #2575fc; font-size: 1.2rem; }
+        .leaderboard-table td { padding: 15px; border-bottom: 1px solid #eee; font-size: 1.1rem; font-weight: bold; color: #444; }
+        .leaderboard-table tr:last-child td { border-bottom: none; }
+        .leaderboard-table tr:hover { background: #fff9e6; }
+        .medal { font-size: 1.5rem; }
+        .empty-message { padding: 30px; text-align: center; color: #888; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -95,12 +109,12 @@
     <div class="screen-container active" id="start-screen">
         <header>
             <h1>🎵 音樂階梯大冒險 🎵</h1>
-            <p class="subtitle">聽音評估系統</p>
+            <p class="subtitle">聽音評估與排行榜系統</p>
         </header>
         <div class="start-form">
             <div class="input-group">
                 <label for="player-name">👤 挑戰者名稱：</label>
-                <input type="text" id="player-name" placeholder="輸入你的名字" autocomplete="off">
+                <input type="text" id="player-name" placeholder="輸入你的名字" autocomplete="off" maxlength="15">
             </div>
             <div class="input-group">
                 <label>⭐ 選擇難度：</label>
@@ -110,7 +124,8 @@
                     <button class="diff-btn" data-diff="hard">高級<br><small>(全隨機)</small></button>
                 </div>
             </div>
-            <button class="start-btn" id="start-game-btn">開始挑戰！🚀</button>
+            <button class="start-btn" id="start-game-btn">🚀 開始挑戰！</button>
+            <button class="leaderboard-entry-btn" id="view-leaderboard-start">🏆 查看榮譽排行榜</button>
         </div>
     </div>
 
@@ -130,7 +145,7 @@
         </div>
         
         <div class="instructions" style="padding: 15px; margin-bottom: 15px;">
-            <p>💡 <span class="highlight-text">最低的階梯放 Do，越高的階梯聲音越高</span>。請將正確的音符放到對應高低的空白階梯上！</p>
+            <p>💡 <span class="highlight-text">最低的階梯放 Do，越高的階梯聲音越高</span>。將正確的音符放到對應高低的空白階梯上！</p>
             <div style="text-align: center; color: #ff6b6b; font-weight: bold; margin-top: 10px;" id="random-challenge-info">本次挑戰需要放置 X 個音符</div>
         </div>
         
@@ -182,14 +197,50 @@
                 ⭐⭐⭐ 音樂小神童！完美過關！
             </div>
         </div>
-        <div style="text-align: center;">
-            <button class="start-btn" id="restart-game-btn">🔄 再玩一次</button>
+        <div class="end-btn-group">
+            <button class="start-btn" id="restart-game-btn" style="flex:1;">🔄 回主選單</button>
+            <button class="leaderboard-entry-btn" id="view-leaderboard-end" style="flex:1;">🏆 睇排行榜</button>
+        </div>
+    </div>
+
+    <!-- 4. 排行榜畫面 -->
+    <div class="screen-container" id="leaderboard-screen">
+        <header>
+            <h1>🏆 榮譽排行榜 🏆</h1>
+        </header>
+        
+        <div class="leaderboard-tabs">
+            <button class="tab-btn active" data-tab="easy">初級</button>
+            <button class="tab-btn" data-tab="normal">中級</button>
+            <button class="tab-btn" data-tab="hard">高級</button>
+        </div>
+
+        <div class="table-container">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>挑戰者</th>
+                        <th>準確度</th>
+                        <th>耗時</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- JS 生成排名 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="end-btn-group">
+            <button class="start-btn" id="back-to-menu-btn" style="flex:2;">⬅️ 返回主選單</button>
+            <button class="action-btn" id="clear-leaderboard-btn" style="background:#ff6b6b; flex:1;">🗑️ 清除紀錄</button>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 音效系統
+            // ================== 音效系統 ==================
             let audioCtx = null;
             function initAudio() {
                 if (!audioCtx) {
@@ -215,7 +266,7 @@
                 } catch (e) { console.log(e); }
             }
 
-            // 遊戲資料
+            // ================== 遊戲資料與狀態 ==================
             const FIXED_PAIRING = { 1: "Do", 2: "Re", 3: "Mi", 4: "Fa", 5: "Sol", 6: "La", 7: "Ti", 8: "Do'" };
             const solfegeData = [
                 { name: "Do", color: "card-do", animal: "🐻", correctPosition: 1, freq: 261.63 },
@@ -245,13 +296,108 @@
                 isComplete: false
             };
 
-            // DOM 元素
             const screens = {
                 start: document.getElementById('start-screen'),
                 game: document.getElementById('game-screen'),
-                result: document.getElementById('result-screen')
+                result: document.getElementById('result-screen'),
+                leaderboard: document.getElementById('leaderboard-screen')
             };
 
+            function switchScreen(screenName) {
+                Object.values(screens).forEach(s => s.classList.remove('active'));
+                screens[screenName].classList.add('active');
+            }
+
+            // ================== 排行榜邏輯 ==================
+            // 讀取/儲存 LocalStorage
+            function getLeaderboardData() {
+                return JSON.parse(localStorage.getItem('solfegeLeaderboard')) || [];
+            }
+            
+            function saveRecord(record) {
+                const data = getLeaderboardData();
+                data.push(record);
+                localStorage.setItem('solfegeLeaderboard', JSON.stringify(data));
+            }
+
+            // 渲染排行榜表格
+            function renderLeaderboard(diffTab) {
+                const tbody = document.getElementById('leaderboard-body');
+                tbody.innerHTML = '';
+                
+                const allData = getLeaderboardData();
+                // 篩選當前難度
+                let filtered = allData.filter(r => r.difficulty === diffTab);
+                
+                // 排序：先按準確度 (高至低)，如果同分，按時間 (少至多)
+                filtered.sort((a, b) => {
+                    if (b.acc !== a.acc) return b.acc - a.acc;
+                    return a.timeSeconds - b.timeSeconds;
+                });
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-message">呢個難度暫時未有挑戰紀錄，快啲做第一個挑戰者啦！</td></tr>`;
+                    return;
+                }
+
+                // 只顯示頭 10 名
+                filtered.slice(0, 10).forEach((record, index) => {
+                    let rankDisplay = index + 1;
+                    if (index === 0) rankDisplay = '<span class="medal">🥇</span>';
+                    if (index === 1) rankDisplay = '<span class="medal">🥈</span>';
+                    if (index === 2) rankDisplay = '<span class="medal">🥉</span>';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${rankDisplay}</td>
+                        <td>${record.name}</td>
+                        <td style="color:#4CAF50;">${record.acc}%</td>
+                        <td style="color:#f12711;">${record.timeStr}</td>
+                        <td style="color:#888; font-size:0.9rem;">${record.date}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // 排行榜分頁切換
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    renderLeaderboard(e.currentTarget.dataset.tab);
+                });
+            });
+
+            // 打開排行榜 (來自起點 / 終點)
+            function openLeaderboard() {
+                initAudio();
+                // 預設切換到當前選擇/遊玩嘅難度分頁
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    if (b.dataset.tab === state.difficulty) b.classList.add('active');
+                    else b.classList.remove('active');
+                });
+                renderLeaderboard(state.difficulty);
+                switchScreen('leaderboard');
+            }
+            document.getElementById('view-leaderboard-start').addEventListener('click', openLeaderboard);
+            document.getElementById('view-leaderboard-end').addEventListener('click', openLeaderboard);
+            
+            // 返回主選單
+            document.getElementById('back-to-menu-btn').addEventListener('click', () => switchScreen('start'));
+            document.getElementById('restart-game-btn').addEventListener('click', () => switchScreen('start'));
+            
+            // 清除紀錄
+            document.getElementById('clear-leaderboard-btn').addEventListener('click', () => {
+                if (confirm('確定要清除所有排行榜紀錄嗎？此動作無法復原！')) {
+                    localStorage.removeItem('solfegeLeaderboard');
+                    // 重新渲染當前分頁
+                    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                    renderLeaderboard(activeTab);
+                }
+            });
+
+
+            // ================== 遊戲主邏輯 ==================
             // 難度選擇
             document.querySelectorAll('.diff-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -264,7 +410,7 @@
 
             // 開始遊戲
             document.getElementById('start-game-btn').addEventListener('click', () => {
-                initAudio(); // 用戶點擊按鈕，解鎖音效
+                initAudio();
                 const nameInput = document.getElementById('player-name').value.trim();
                 state.playerName = nameInput || "音樂小精靈";
                 
@@ -276,16 +422,6 @@
                 startTimer();
                 startRound();
             });
-
-            // 再玩一次
-            document.getElementById('restart-game-btn').addEventListener('click', () => {
-                switchScreen('start');
-            });
-
-            function switchScreen(screenName) {
-                Object.values(screens).forEach(s => s.classList.remove('active'));
-                screens[screenName].classList.add('active');
-            }
 
             function startTimer() {
                 clearInterval(state.timerInterval);
@@ -301,6 +437,7 @@
                 const mins = String(Math.floor(state.timeElapsed / 60)).padStart(2, '0');
                 const secs = String(state.timeElapsed % 60).padStart(2, '0');
                 document.getElementById('timer-display').textContent = `${mins}:${secs}`;
+                return `${mins}:${secs}`;
             }
 
             function resetFullGame() {
@@ -348,7 +485,6 @@
                     .filter(item => state.currentPositions.includes(item.correctPosition))
                     .map((item, i) => ({ ...item, cardId: `card-${i}` }));
                 
-                // Shuffle cards
                 for (let i = state.availableCards.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [state.availableCards[i], state.availableCards[j]] = [state.availableCards[j], state.availableCards[i]];
@@ -364,7 +500,6 @@
                 return arr.slice(0, count).sort((a, b) => a - b);
             }
 
-            // UI 渲染與拖曳邏輯 (保留原有功能)
             function generateCards() {
                 const grid = document.getElementById('cards-grid');
                 grid.innerHTML = '';
@@ -562,12 +697,14 @@
 
             function endGame() {
                 clearInterval(state.timerInterval);
-                
                 const finalAcc = Math.round((state.totalCorrect / state.totalPossible) * 100);
+                const timeString = document.getElementById('timer-display').textContent;
+                
+                // 更新結算畫面
                 document.getElementById('final-name').textContent = state.playerName;
                 document.getElementById('final-diff').textContent = state.difficultyName;
                 document.getElementById('final-score').textContent = `${finalAcc}%`;
-                document.getElementById('final-time').textContent = document.getElementById('timer-display').textContent;
+                document.getElementById('final-time').textContent = timeString;
                 
                 let feedback = "";
                 if (finalAcc === 100) {
@@ -581,6 +718,17 @@
                 }
                 document.getElementById('final-feedback').textContent = feedback;
                 
+                // 儲存排行榜紀錄
+                const dateOpt = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                saveRecord({
+                    name: state.playerName,
+                    difficulty: state.difficulty,
+                    acc: finalAcc,
+                    timeSeconds: state.timeElapsed,
+                    timeStr: timeString,
+                    date: new Date().toLocaleDateString('zh-TW', dateOpt)
+                });
+
                 switchScreen('result');
             }
         });
