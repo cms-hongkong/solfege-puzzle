@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>音樂階梯大冒險 | 聽音挑戰</title>
     <style>
-        /* =========================================
-           CSS 樣式區塊
-           ========================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif; }
         body { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .game-container { width: 100%; max-width: 1000px; background-color: rgba(255, 255, 255, 0.95); border-radius: 25px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); overflow: hidden; padding: 25px; }
@@ -23,18 +20,23 @@
         .instructions h2 { color: #2575fc; margin-bottom: 15px; font-size: 1.5rem; }
         .instructions p { color: #333; line-height: 1.6; margin-bottom: 10px; font-size: 1.1rem; }
         .highlight-text { color: #ff6b6b; font-weight: bold; }
-        .current-challenge { background: #fff9e6; border-radius: 10px; padding: 15px; margin-top: 15px; border: 2px dashed #ff9a3d; }
-        .challenge-numbers { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; justify-content: center; }
-        .challenge-number { background: #6a11cb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+        .current-challenge { background: #fff9e6; border-radius: 10px; padding: 15px; margin-top: 15px; border: 2px dashed #ff9a3d; text-align: center;}
+        
         .game-area { display: flex; flex-direction: column; gap: 25px; }
         @media (min-width: 768px) { .game-area { flex-direction: row; } }
         .staircase-container { flex: 2; background: #f8f9ff; border-radius: 20px; padding: 20px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1); }
         .staircase { display: flex; flex-direction: column; align-items: center; height: 100%; position: relative; }
+        
+        /* 階梯樣式 - 移除所有文字提示，單純靠高度視覺 */
         .step { width: 90%; height: 70px; background: white; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); border: 4px solid transparent; transition: all 0.3s ease; position: relative; z-index: 2; cursor: pointer; }
         .step.filled { transform: scale(1.05); border-color: #ffd93d; }
-        .step-label { position: absolute; left: 20px; font-size: 1.2rem; color: #888; }
-        .step-number { position: absolute; right: 20px; background: #6a11cb; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        
+        /* 隱藏數字與標籤 */
+        .step-label { display: none; }
+        .step-number { display: none; }
+
         .staircase-line { position: absolute; width: 8px; background: linear-gradient(to bottom, #ff6b6b, #4d96ff); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 1; border-radius: 4px; }
+        
         .cards-container { flex: 1.5; background: #fff9e6; border-radius: 20px; padding: 20px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; }
         .cards-title { text-align: center; color: #ff9a3d; margin-bottom: 20px; font-size: 1.5rem; }
         .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; flex-grow: 1; min-height: 200px; }
@@ -42,6 +44,8 @@
         .solfege-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25); }
         .solfege-card:active { transform: scale(0.95); cursor: grabbing; }
         .solfege-card .animal-icon { font-size: 1.5rem; margin-top: 5px; }
+        
+        /* 卡片顏色 */
         .card-do { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
         .card-re { background: linear-gradient(135deg, #FF9A3D, #FFB56B); }
         .card-mi { background: linear-gradient(135deg, #FFD93D, #FFE57F); }
@@ -49,6 +53,7 @@
         .card-sol { background: linear-gradient(135deg, #4D96FF, #6BAAFF); }
         .card-la { background: linear-gradient(135deg, #9D4EDD, #B26FE6); }
         .card-ti { background: linear-gradient(135deg, #FF6B9D, #FF8EB5); }
+        
         .controls { display: flex; flex-direction: column; gap: 15px; margin-top: auto; }
         .message { text-align: center; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: bold; min-height: 70px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; line-height: 1.5; }
         .message.success { background-color: #e7f7e7; color: #2e7d32; border: 3px solid #a5d6a7; }
@@ -69,7 +74,7 @@
         .correct-feedback { background: #4CAF50; }
         .incorrect-feedback { background: #f44336; }
         .challenge-counter { text-align: center; font-size: 1.2rem; margin-top: 15px; color: #6a11cb; font-weight: bold; }
-        .random-challenge-info { text-align: center; font-size: 1.1rem; margin-top: 10px; color: #ff6b6b; }
+        .random-challenge-info { text-align: center; font-size: 1.1rem; margin-top: 10px; color: #ff6b6b; font-weight: bold;}
         @keyframes celebrate { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .celebrate { animation: celebrate 0.5s ease 3; }
     </style>
@@ -86,7 +91,7 @@
                 <span class="mode-icon" id="mode-icon">🎧</span>
                 <div>
                     <div id="mode-name">聽音挑戰</div>
-                    <div id="challenge-desc">聽聲音排階梯！</div>
+                    <div id="challenge-desc">靠耳朵分辨高低！</div>
                 </div>
             </div>
             <div class="score-board">
@@ -98,13 +103,11 @@
         
         <div class="instructions">
             <h2>📚 遊戲規則：</h2>
-            <p>1. 點擊或拖曳卡片時，你會聽到<span class="highlight-text">真實的音高</span>！</p>
-            <p>2. 階梯越高，聲音就應該越高。試著用耳朵聽，把正確的音符放到對應的高低階梯上！</p>
-            <p>3. 如果唔肯定，可以隨時點擊卡片聽聲音比較。</p>
+            <p>1. 點擊卡片聽聽<span class="highlight-text">音高</span>！</p>
+            <p>2. 觀察空白階梯的高低位置。</p>
+            <p>3. <span class="highlight-text">最低的階梯放 Do，越高的階梯聲音越高</span>。請將正確的音符放到對應高低的階梯上！</p>
             <div class="current-challenge">
-                <h3>🎯 當前挑戰階梯：</h3>
-                <div class="challenge-numbers" id="current-challenge-numbers"></div>
-                <div class="random-challenge-info" id="random-challenge-info">將卡片放到顯示的階梯上！</div>
+                <div class="random-challenge-info" id="random-challenge-info">本次挑戰需要放置 X 個音符</div>
             </div>
         </div>
         
@@ -113,24 +116,24 @@
                 <h2 style="text-align: center; color: #6a11cb; margin-bottom: 20px;">🎼 音樂階梯 🎼</h2>
                 <div class="staircase">
                     <div class="staircase-line"></div>
-                    <div class="step" data-position="8"><span class="step-label">第8階</span><div class="step-number">8</div></div>
-                    <div class="step" data-position="7"><span class="step-label">第7階</span><div class="step-number">7</div></div>
-                    <div class="step" data-position="6"><span class="step-label">第6階</span><div class="step-number">6</div></div>
-                    <div class="step" data-position="5"><span class="step-label">第5階</span><div class="step-number">5</div></div>
-                    <div class="step" data-position="4"><span class="step-label">第4階</span><div class="step-number">4</div></div>
-                    <div class="step" data-position="3"><span class="step-label">第3階</span><div class="step-number">3</div></div>
-                    <div class="step" data-position="2"><span class="step-label">第2階</span><div class="step-number">2</div></div>
-                    <div class="step" data-position="1"><span class="step-label">第1階</span><div class="step-number">1</div></div>
+                    <!-- 階梯內部而家係完全空白，只靠位置顯示高低 -->
+                    <div class="step" data-position="8"></div>
+                    <div class="step" data-position="7"></div>
+                    <div class="step" data-position="6"></div>
+                    <div class="step" data-position="5"></div>
+                    <div class="step" data-position="4"></div>
+                    <div class="step" data-position="3"></div>
+                    <div class="step" data-position="2"></div>
+                    <div class="step" data-position="1"></div>
                 </div>
             </div>
             
             <div class="cards-container">
                 <h2 class="cards-title">🎴 可用音符 🎴</h2>
-                <!-- 卡片生成區域 -->
                 <div class="cards-grid" id="cards-grid"></div>
                 
                 <div class="controls">
-                    <div class="message info" id="message">💡 點擊卡片聽聽聲音，然後拖動到階梯上！</div>
+                    <div class="message info" id="message">💡 點擊聽聲音，判斷高低，拖到正確的階梯上！</div>
                     <div class="buttons">
                         <button id="play-staircase-btn">🎧 聽聽階梯</button>
                         <button id="check-btn">✅ 檢查答案</button>
@@ -146,9 +149,6 @@
     </div>
 
     <script>
-        // =========================================
-        // JavaScript 遊戲邏輯區塊
-        // =========================================
         document.addEventListener('DOMContentLoaded', function() {
             let audioCtx = null;
 
@@ -213,7 +213,6 @@
                 scoreDisplay: document.getElementById('score'),
                 highScoreDisplay: document.getElementById('high-score'),
                 challengeCount: document.getElementById('challenge-count'),
-                currentChallengeNumbers: document.getElementById('current-challenge-numbers'),
                 randomChallengeInfo: document.getElementById('random-challenge-info'),
                 challengeType: document.getElementById('challenge-type'),
                 messageDiv: document.getElementById('message'),
@@ -274,7 +273,7 @@
                 generateCards();
                 updateDisplays();
                 updateStepVisibility();
-                updateMessage(`挑戰 ${gameState.currentChallenge}：聽聽聲音，把音符排好！`, 'info');
+                updateMessage(`挑戰 ${gameState.currentChallenge}：聽聽聲音，判斷高低，將音符放上階梯！`, 'info');
                 setupCardEvents();
             }
 
@@ -294,13 +293,8 @@
             }
 
             function updateDisplays() {
-                dom.currentChallengeNumbers.innerHTML = '';
-                gameState.currentPositions.forEach(pos => {
-                    const div = document.createElement('div');
-                    div.className = 'challenge-number'; div.textContent = pos;
-                    dom.currentChallengeNumbers.appendChild(div);
-                });
-                dom.randomChallengeInfo.textContent = `需要放置 ${gameState.currentPositions.length} 個音符`;
+                // 移除了 currentChallengeNumbers 的顯示邏輯
+                dom.randomChallengeInfo.textContent = `🎯 觀察右邊的空白階梯，本次需要放置 ${gameState.currentPositions.length} 個音符`;
             }
 
             function resetStaircaseDisplay() {
@@ -309,8 +303,8 @@
                     step.classList.remove('filled', 'celebrate');
                     step.style.background = 'white';
                     step.style.border = '4px solid transparent';
-                    const pos = step.dataset.position;
-                    step.innerHTML = `<span class="step-label">第${pos}階</span><div class="step-number">${pos}</div>`;
+                    // 清空內容，不再顯示任何數字
+                    step.innerHTML = '';
                 });
             }
 
@@ -392,7 +386,7 @@
                 gameState.placedCards++;
                 const animal = solfegeData.find(i => i.correctPosition == data.correctPosition).animal;
                 
-                step.innerHTML = `<span class="step-label">第${pos}階</span><div class="step-number">${pos}</div><div style="font-size: 1.8rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);">${data.solfege} <span class="animal-icon">${animal}</span></div>`;
+                step.innerHTML = `<div style="font-size: 1.8rem; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);">${data.solfege} <span class="animal-icon">${animal}</span></div>`;
                 step.classList.add('filled');
                 step.style.background = getCardColor(data.solfege);
                 
@@ -408,7 +402,7 @@
                 gameState.placedCards--;
                 
                 const step = document.querySelector(`.step[data-position="${pos}"]`);
-                step.innerHTML = `<span class="step-label">第${pos}階</span><div class="step-number">${pos}</div>`;
+                step.innerHTML = ``;
                 step.classList.remove('filled');
                 step.style.background = 'white';
                 
